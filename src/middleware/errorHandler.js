@@ -1,0 +1,14 @@
+export const errorHandler = (err, req, res, next) => {
+    console.error(`Error en ${req.method} ${req.url}:`, err.stack);
+
+    const status = err.status || 500;
+    const message = err.message || 'Error interno del servidor';
+
+    res.status(status).json({
+        success: false,
+        status,
+        message,
+        // En desarrollo mostramos el stack, en producción no
+        stack: process.env.NODE_ENV === 'development' ? err.stack : {}
+    });
+};

@@ -1,27 +1,43 @@
 import * as authService from '../services/authService.js';
 
-export const login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const result = await authService.loginUser(username, password);
-    res.json(result);
-  } catch (error) {
-    if (error.message === 'USER_NOT_FOUND' || error.message === 'INVALID_PASSWORD') {
-        return res.status(400).json({ msg: 'Credenciales inválidas' });
+export const login = async (req, res, next) => {
+    try {
+        const { username, password } = req.body;
+        const result = await authService.login(username, password);
+        res.json(result);
+    } catch (error) {
+        next(error);
     }
-    res.status(500).json({ msg: 'Error del servidor' });
-  }
 };
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
     try {
-        const { username, password, role } = req.body;
-        const newUser = await authService.registerUser(username, password, role);
-        res.status(201).json(newUser);
+        const result = await authService.register(req.body);
+        res.status(201).json(result);
     } catch (error) {
-        if (error.message === 'USER_ALREADY_EXISTS') {
-            return res.status(400).json({ msg: 'El usuario ya existe' });
+        if (error.code === '23505') {
+            return res.status(400).json({ message: 'El usuario ya existe' });
         }
-        res.status(500).json({ msg: error.message });
+        next(error);
+    }
+};
+
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const result = await authService.forgotPassword(req.body.email);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+        const result = await authService.resetPassword(token, newPassword);
+        res.json(result);
+    } catch (error) {
+        next(error);
     }
 };

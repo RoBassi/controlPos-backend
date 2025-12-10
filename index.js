@@ -1,35 +1,24 @@
-import express from 'express';
-import cors from 'cors';
+import app from './src/app.js';
+import { pool } from './src/config/db.js';
 import 'dotenv/config';
-import authRoutes from './src/routes/authRoutes.js';
-import productRoutes from './src/routes/productRoutes.js';
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+const startServer = async () => {
+    try {
+        // Probar conexion a la bd antes de iniciar
+        const res = await pool.query('SELECT NOW()');
+        console.log(`✅ Base de Datos conectada: ${process.env.DB_DATABASE} a las ${res.rows[0].now}`);
 
-// Endpoints
-app.use('/api/auth', authRoutes);
-app.use('/api/productos', productRoutes);
+        // Iniciar servidor Express
+        app.listen(PORT, () => {
+            console.log(`Servidor corriendo en: http://localhost:${PORT}`);
+        });
 
-// Health Check
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'API Online', 
-    message: 'Backend de ControlPOS funcionando correctamente' 
-  });
-});
+    } catch (error) {
+        console.error('Error fatal al iniciar la aplicación:', error);
+        process.exit(1); // Salir con error
+    }
+};
 
-// Rutas no encontradas (404)
-app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
-});
-
-// Iniciar el servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-  console.log(`Base de Datos: ${process.env.DB_DATABASE}`);
-});
+startServer();

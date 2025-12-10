@@ -1,11 +1,21 @@
-import express from 'express';
-import * as productController from '../controllers/productController.js';
-import { authenticateToken, authorizeRole } from '../middleware/authMiddleware.js';
+import { Router } from 'express';
+import { 
+    getProducts, 
+    createProduct, 
+    updateProduct, 
+    deleteProduct 
+} from '../controllers/productController.js';
+import { authenticateToken } from '../middleware/authMiddleware.js'; 
 
-const router = express.Router();
+const router = Router();
+router.use(authenticateToken);
 
-router.get('/', authenticateToken, productController.getProducts);
-router.get('/bajo-stock', authenticateToken, productController.getLowStock);
-router.post('/', authenticateToken, authorizeRole('administrador'), productController.createProduct);
+// Rutas base: /api/productos
+router.get('/', getProducts);
+router.post('/', createProduct);
+
+// Rutas con ID
+router.put('/:id', updateProduct);
+router.delete('/:id', deleteProduct);
 
 export default router;

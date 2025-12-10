@@ -1,17 +1,28 @@
-import * as productRepository from '../repositories/productRepository.js';
+import * as productRepo from '../repositories/productRepository.js';
 
-export const getAllProducts = async (filters) => {
-    return await productRepository.findAll(filters.search, filters.rubro);
+export const getAllProducts = async () => {
+    return await productRepo.findAll();
 };
 
-export const getLowStockProducts = async () => {
-    return await productRepository.findLowStock();
+export const getProductById = async (id) => {
+    const product = await productRepo.findById(id);
+    if (!product) throw { status: 404, message: 'Producto no encontrado' };
+    return product;
 };
 
-export const createProduct = async (productData) => {
-    // Agregar lógica: "Si el precio venta < costo, lanzar error"
-    if (productData.precio_venta < productData.precio_costo) {
-        throw new Error('PRICE_ERROR: El precio de venta no puede ser menor al costo');
-    }
-    return await productRepository.create(productData);
+export const createProduct = async (data) => {
+    if (data.precio_venta < data.precio_costo) throw { status: 400, message: 'El precio de venta no puede ser menor al costo' };
+    return await productRepo.create(data);
+};
+
+export const updateProduct = async (id, data) => {
+    const existing = await productRepo.findById(id);
+    if (!existing) throw { status: 404, message: 'Producto no encontrado' };
+    return await productRepo.update(id, data);
+};
+
+export const deleteProduct = async (id) => {
+    const deleted = await productRepo.remove(id);
+    if (!deleted) throw { status: 404, message: 'Producto no encontrado' };
+    return { message: 'Producto eliminado' };
 };
