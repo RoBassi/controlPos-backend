@@ -1,7 +1,17 @@
 import nodemailer from 'nodemailer';
 
+// --- AGREGA ESTO PARA DEPURAR (BORRAR LUEGO) ---
+console.log("---- DEBUG MAILER ----");
+console.log("User:", process.env.EMAIL_USER);
+// Solo mostramos los primeros y últimos caracteres por seguridad visual
+const pass = process.env.EMAIL_PASS || "";
+console.log("Pass:", pass.substring(0, 3) + "..." + pass.substring(pass.length - 3));
+console.log("----------------------");
+// --
 const transporter = nodemailer.createTransport({
-    service: 'Gmail', // O lo que se use en .env
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true para 465, false para otros puertos
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,

@@ -5,6 +5,20 @@ import crypto from 'crypto';
 import { generateToken } from '../utils/jwt.js';
 import { sendEmail } from '../utils/mailer.js';
 
+export const isSystemInitialized = async () => {
+    return await userRepo.hasUsers();
+};
+
+// Crea el primer usuario sin estar logueado
+export const createFirstAdmin = async (userData) => {
+    const initialized = await userRepo.hasUsers();
+    if (initialized) {
+        throw { status: 403, message: 'El sistema ya está inicializado. No se puede crear admin público.' };
+    }
+    // Forzamos el rol a admin
+    return await userService.createUser({ ...userData, role: 'administrador' });
+};
+
 export const login = async (username, password) => {
     const user = await userRepo.findByUsername(username);
     if (!user) throw { status: 400, message: 'Usuario no encontrado' };

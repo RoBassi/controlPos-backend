@@ -64,9 +64,12 @@ export const saveResetToken = async (userId, token, expires) => {
 };
 
 export const findByResetToken = async (token) => {
+    // Usa new Date() de JS para comparar, asi evitamos problemas de zona horaria con la DB
+    const now = new Date();
+    
     const res = await pool.query(
-        "SELECT * FROM usuario WHERE reset_token = $1 AND reset_token_expires > NOW()",
-        [token]
+        "SELECT * FROM usuario WHERE reset_token = $1 AND reset_token_expires > $2",
+        [token, now]
     );
     return res.rows[0];
 };
@@ -76,4 +79,9 @@ export const clearResetToken = async (userId) => {
         "UPDATE usuario SET reset_token = NULL, reset_token_expires = NULL WHERE id_user = $1",
         [userId]
     );
+};
+
+export const hasUsers = async () => {
+    const res = await pool.query('SELECT COUNT(*) FROM usuario');
+    return parseInt(res.rows[0].count) > 0;
 };

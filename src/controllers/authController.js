@@ -41,3 +41,21 @@ export const resetPassword = async (req, res, next) => {
         next(error);
     }
 };
+
+export const checkStatus = async (req, res, next) => {
+    try {
+        const initialized = await authService.isSystemInitialized();
+        res.json({ initialized });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const setupAdmin = async (req, res, next) => {
+    try {
+        const newUser = await authService.createFirstAdmin(req.body);
+        res.status(201).json(newUser);
+    } catch (error) {
+        next(error);
+    }
+};
